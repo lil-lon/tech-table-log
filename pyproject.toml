@@ -1,0 +1,30 @@
+[project]
+name = "podcast-agents"
+version = "0.1.0"
+readme = "README.md"
+description = "Podcast production agent for Tech Table Log"
+requires-python = ">=3.12"
+authors = [{ name = "lil-lon", email = "69704776+lil-lon@users.noreply.github.com" }]
+license = { file = "LICENSE" }
+dependencies = [
+    "faster-whisper>=1.1.0",
+    "claude-agent-sdk>=0.1.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = [
+    "ruff>=0.5.0",
+    "ty>=0.0.11",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+include = ["src/**/*.py"]
+
+[tool.ty.src]
+include = ["src"]
