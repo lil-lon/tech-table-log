@@ -2,6 +2,7 @@
 Core Podcast agents definition
 """
 
+import shlex
 from pathlib import Path
 from typing import Literal
 
@@ -182,32 +183,64 @@ async def _validate_bash_command(
             }
         }
 
-    # Check if command starts with allowed prefixes
-    allowed_prefixes = "uv run python "
-    if not command.startswith(allowed_prefixes):
-        logger.warning(f"[BLOCKED] Command: {command}")
+    # Parse and validate tokens to prevent command injection.
+    try:
+        tokens = shlex.split(command)
+    except ValueError as exc:
+        logger.warning(f"[BLOCKED] Invalid command: {command}")
+        return {
+            "hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "permissionDecision": "deny",
+                "permissionDecisionReason": f"Invalid command syntax: {exc}",
+            }
+        }
+
+    shell_metacharacters = {";", "|", "&", "<", ">", "`", "$"}
+    if any(any(ch in token for ch in shell_metacharacters) for token in tokens):
+        logger.warning(f"[BLOCKED] Shell metacharacters detected: {command}")
         return {
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
                 "permissionDecision": "deny",
                 "permissionDecisionReason": (
-                    f"Security violation: Only 'python' or 'uv run python' commands are allowed. "
-                    f"Attempted command: {command}"
+                    "Security violation: Shell metacharacters are not allowed in commands."
                 ),
             }
         }
 
-    # Additional validation for the specific module
-    if "podcast_agents.tools.transcribe" not in command:
-        logger.warning(f"[BLOCKED] Non-transcribe command: {command}")
+    expected_prefix = ["uv", "run", "python", "-m", "podcast_agents.tools.transcribe"]
+    if tokens[:5] != expected_prefix or len(tokens) != 7:
+        logger.warning(f"[BLOCKED] Command does not match expected pattern: {command}")
         return {
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
                 "permissionDecision": "deny",
                 "permissionDecisionReason": (
-                    f"Only podcast_agents.tools.transcribe module is allowed. "
-                    f"Attempted command: {command}"
+                    "Only 'uv run python -m podcast_agents.tools.transcribe -n <episode_number>' "
+                    "is allowed."
                 ),
+            }
+        }
+
+    if tokens[5] not in ("-n", "--number"):
+        logger.warning(f"[BLOCKED] Invalid flag: {command}")
+        return {
+            "hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "permissionDecision": "deny",
+                "permissionDecisionReason": "Only '-n' or '--number' flag is allowed.",
+            }
+        }
+
+    episode_number = tokens[6]
+    if not episode_number.isdigit():
+        logger.warning(f"[BLOCKED] Invalid episode number: {command}")
+        return {
+            "hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "permissionDecision": "deny",
+                "permissionDecisionReason": "Episode number must be numeric.",
             }
         }
 
