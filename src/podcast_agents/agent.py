@@ -123,7 +123,16 @@ def build_workflow_agent() -> ClaudeAgentOptions:
     }
 
     options = ClaudeAgentOptions(
-        allowed_tools=["Read", "Write", "Glob", "Grep", "TaskOutput", "Task"],
+        allowed_tools=[
+            "Read",
+            "Write",
+            "Glob",
+            "Grep",
+            "TaskOutput",
+            "Task",
+            "Bash",
+            "WebSearch",
+        ],
         permission_mode="acceptEdits",
         cwd=str(Path.cwd()),
         hooks=hooks,
