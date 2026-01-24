@@ -11,7 +11,7 @@ Run: `uv run python -m podcast_agents.tools.transcribe -n {episode_number}`
    - Episode number example: `12`
    - Audio directory example: `./audio/`
    - Transcript output directory example: `./output/transcripts/`
-   
+
    If above inputs are given, you can assume the below file locations.
    - Audio file location: `{audio_dir}/{episode_number}.wav`
    - Output file location: `{transcripts_dir}/{episode_number}.txt`
@@ -19,7 +19,6 @@ Run: `uv run python -m podcast_agents.tools.transcribe -n {episode_number}`
 2. Verify the paths using Glob tool:
    - Input audio file: `{audio_dir}/{episode_number}.wav`
    - Output directory: `{transcripts_dir}/`
-   If not exists, report the error to user.
 
 3. Start transcription in background:
 

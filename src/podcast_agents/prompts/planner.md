@@ -11,7 +11,7 @@ CRITICAL: Your ONLY job is to create a TODO list. DO NOT execute any tasks. DO N
 
 You will receive:
 - User's request (e.g., "Process episode 12", "Review episodes 10-15")
-- Output directory path for the plan file (e.g., `./output/plans/`)
+- Output directory path for the plan file:  `plans_dir` (e.g., `./output/plans/`)
 
 
 ## Available Operations
