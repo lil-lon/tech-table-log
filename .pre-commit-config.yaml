@@ -16,6 +16,6 @@ repos:
 
       - id: gitleaks
         name: gitleaks
-        entry: gitleaks git --staged --no-banner
+        entry: gitleaks git --staged
         language: system
         pass_filenames: false
