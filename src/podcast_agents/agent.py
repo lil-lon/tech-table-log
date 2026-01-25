@@ -8,11 +8,15 @@ from typing import Literal
 
 from claude_agent_sdk import (
     AgentDefinition,
+    AssistantMessage,
     ClaudeAgentOptions,
+    ClaudeSDKClient,
     HookContext,
     HookInput,
     HookJSONOutput,
     HookMatcher,
+    ResultMessage,
+    TextBlock,
 )
 
 from podcast_agents import config
@@ -159,6 +163,58 @@ def build_planner_agent() -> ClaudeAgentOptions:
         system_prompt=planner_prompt,
     )
     return options
+
+
+async def run_agent(options: ClaudeAgentOptions, prompt: str) -> list[str]:
+    """
+    Execute an agent with the given options and prompt.
+
+    Logs all messages and returns list of written file paths.
+
+    Args:
+        options: Agent configuration options
+        prompt: User prompt to send to the agent
+
+    Returns:
+        List of file paths written by the agent
+    """
+    written_files: list[str] = []
+
+    async with ClaudeSDKClient(options=options) as client:
+        await client.query(prompt)
+
+        async for message in client.receive_response():
+            if isinstance(message, AssistantMessage):
+                for block in message.content:
+                    if isinstance(block, TextBlock):
+                        logger.info(f"Agent: {block.text}")
+                    elif hasattr(block, "name"):
+                        tool_name = block.name
+                        tool_input = getattr(block, "input", {})
+
+                        # Capture written file paths
+                        if tool_name == "Write" and tool_input:
+                            file_path = tool_input.get("file_path")
+                            if file_path:
+                                written_files.append(file_path)
+
+                        if tool_name == "Bash" and tool_input:
+                            logger.info(f"[Tool: {tool_name}]")
+                            logger.info(f"  Command: {tool_input.get('command', '')}")
+                        else:
+                            logger.info(f"[Tool: {tool_name}]")
+                        if tool_input:
+                            logger.debug(f"Tool input: {tool_input}")
+
+            elif isinstance(message, ResultMessage):
+                logger.info("-" * 60)
+                logger.info(f"Task Result: {message.subtype}")
+                logger.info(f"Duration: {message.duration_ms / 1000:.2f}s")
+                logger.info(f"Turns: {message.num_turns}")
+                if message.total_cost_usd:
+                    logger.info(f"Cost: ${message.total_cost_usd:.4f}")
+
+    return written_files
 
 
 async def _validate_bash_command(
