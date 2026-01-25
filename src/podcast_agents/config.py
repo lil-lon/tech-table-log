@@ -6,6 +6,7 @@ from pathlib import Path
 
 LOG_DIR = Path("./logs")
 AUDIO_DIR = Path("./audio")
+REFERENCE_MATERIALS_DIR = Path("./reference_materials")
 
 # Output directories
 OUTPUT_DIR = Path("./output")

@@ -118,7 +118,7 @@ def build_workflow_agent() -> ClaudeAgentOptions:
                 "Handles: technical accuracy review, fact-checking, controversy detection. "
                 f"Input directory: {config.MODIFIED_TRANSCRIPTS_DIR}, "
                 f"Output directory: {config.REVIEWS_DIR}, "
-                "Episode assets: ./episode-assets/"
+                f"Reference materials: {config.REFERENCE_MATERIALS_DIR}"
             ),
             prompt=review_prompt,
             tools=["Read", "Write", "Glob", "Grep", "WebSearch"],

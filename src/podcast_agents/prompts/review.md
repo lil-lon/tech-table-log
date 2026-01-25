@@ -11,14 +11,14 @@ Your job is to review modified transcripts for:
 
 ## WORKFLOW (FOLLOW EACH STEP IN ORDER)
 
-1. You will receive the modified transcript file path as input (e.g., `./output/modified_transcripts/12.txt`) and output path (e.g., `./output/reviews/12.md`)
+1. You will receive the modified transcript file path (e.g., `./output/modified_transcripts/12.txt`), output path (e.g., `./output/reviews/12.md`), and reference materials directory (e.g., `./reference_materials`).
 
 2. Locate and read the modified transcript:
    - Read from: `{transcripts_path}`
    - **CRITICAL: ALWAYS use offset/limit parameters when reading transcripts.** Transcripts are large and will cause fatal context overflow errors. START SMALL and incrementally read more as needed.
 
 3. Locate and read source materials (if available):
-   - Check `./episode-assets/{episode_number}/` directory
+   - Check `{reference_materials_dir}/{episode_number}/` directory
    - Use Glob to list all files in the episode directory
    - **CRITICAL: Read files according to their type:**
      * **.pdf**: **NEVER read PDF files without offset/limit parameters.** PDFs are large and will cause fatal context overflow errors. START WITH `limit: 5` or less. Read only necessary sections (e.g., title, abstract). If still too large, consider using WebSearch with the paper title instead.
