@@ -154,7 +154,12 @@ def build_planner_agent() -> ClaudeAgentOptions:
     Returns:
         planner agent definition (ClaudeAgentOptions)
     """
+    # Ensure plans directory exists
+    config.PLANS_DIR.mkdir(parents=True, exist_ok=True)
+
     planner_prompt = load_prompt("planner")
+    # Add plans directory info to the prompt
+    planner_prompt += f"\n\nOutput directory for plans: {config.PLANS_DIR}"
 
     options = ClaudeAgentOptions(
         allowed_tools=["Read", "Write", "Glob"],
