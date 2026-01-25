@@ -35,29 +35,17 @@ async def run_interactive_workflow(user_prompt: str) -> None:
 
     plan_file_path = written_files[0] if written_files else None
     if not plan_file_path:
-        print("Failed to create execution plan. Please try again.")
+        logger.error("Failed to create execution plan. Please try again.")
         return
 
-    # Validate plan file path
+    # Validate plan file path before reading
     plans_dir = config.PLANS_DIR.resolve()
     resolved_plan_path = Path(plan_file_path).resolve()
     if resolved_plan_path.parent != plans_dir:
-        print(f"Error: Plan path is outside allowed directory: {plan_file_path}")
+        logger.error(f"Error: Plan path is outside allowed directory: {plan_file_path}")
         return
 
-    # Read and display the plan file
-    try:
-        with open(resolved_plan_path, "r", encoding="utf-8") as f:
-            plan_content = f.read()
-    except FileNotFoundError:
-        print(f"Error: Plan file not found at {resolved_plan_path}")
-        return
-
-    print(f"Plan saved to: {resolved_plan_path}")
-    print("\nTODO List:")
-    print("-" * 60)
-    print(plan_content)
-    print("-" * 60)
+    logger.info(f"Plan saved to: {resolved_plan_path}")
 
     # Phase 2: Approval
     approval = input("Proceed with execution? (y/n): ")
@@ -74,7 +62,7 @@ async def run_interactive_workflow(user_prompt: str) -> None:
         options = build_workflow_agent()
         await run_agent(options, f"Please execute the plan at {resolved_plan_path}")
         print("\n" + "=" * 60)
-        print("All tasks completed successfully!")
+        logger.info("All tasks completed successfully!")
         print("=" * 60 + "\n")
     except Exception as e:
         print(f"\nWorkflow failed: {e}\n")
@@ -88,9 +76,6 @@ async def main():
     print("=" * 60)
     print("\nExamples:")
     print("  - 'Process episode 12 completely'")
-    print("  - 'Transcribe and modify episode 13'")
-    print("  - 'Review episode 14'")
-    print("  - 'Transcribe episodes 10, 11, and 12'")
     print()
 
     user_request = input("Enter your request: ").strip()
