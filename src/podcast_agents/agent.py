@@ -70,11 +70,13 @@ def build_workflow_agent() -> ClaudeAgentOptions:
     config.TRANSCRIPTS_DIR.mkdir(parents=True, exist_ok=True)
     config.MODIFIED_TRANSCRIPTS_DIR.mkdir(parents=True, exist_ok=True)
     config.REVIEWS_DIR.mkdir(parents=True, exist_ok=True)
+    config.SHOW_NOTES_DIR.mkdir(parents=True, exist_ok=True)
 
     # Load prompts from markdown files (about_podcast context is auto-included)
     transcribe_prompt = load_prompt("transcribe")
     modify_prompt = load_prompt("modify")
     review_prompt = load_prompt("review")
+    show_notes_prompt = load_prompt("show_notes")
 
     # Define bash validation hooks
     hooks: dict[HookEvent, list[HookMatcher]] = {
@@ -122,6 +124,18 @@ def build_workflow_agent() -> ClaudeAgentOptions:
             ),
             prompt=review_prompt,
             tools=["Read", "Write", "Glob", "Grep", "WebSearch"],
+            model="opus",
+        ),
+        "show_notes": AgentDefinition(
+            description=(
+                "Show notes generation specialist. Creates HTML show notes in Japanese "
+                "from modified transcripts and reference materials. "
+                f"Input: {config.MODIFIED_TRANSCRIPTS_DIR}, "
+                f"References: {config.REFERENCE_MATERIALS_DIR}, "
+                f"Output: {config.SHOW_NOTES_DIR}"
+            ),
+            prompt=show_notes_prompt,
+            tools=["Read", "Write", "Glob", "Grep"],
             model="opus",
         ),
     }

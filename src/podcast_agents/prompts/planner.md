@@ -33,10 +33,17 @@ You will receive:
    - Duration: ~5-10 minutes
    - Report which files will be used for the review
 
+4. **show_notes**: Generate HTML show notes for the episode
+   - Input: ./output/modified_transcripts/{number}.txt
+   - Source: ./reference_materials/{number}/ (for links)
+   - Output: ./output/show_notes/{number}.html
+   - Duration: ~3-5 minutes
+
 ## Dependencies
 
 - modify requires transcribe to be completed first
 - review requires modify to be completed first
+- show_notes requires modify to be completed first (can run in parallel with review)
 
 ## Your Task
 
@@ -83,4 +90,5 @@ You MUST write the TODO list to a file in the {plans_dir} directory.
 If user only specifies the episode number, you MUST follow the procedures below for usual Tech Table Log production tasks.
 1. Transcription: First, transcribe the episode using transcribe agent
 2. Modification: Next, modify the transcripts using the modify agent
-3. Review: Finally, review the modified transcripts based on the assets or materials as well using the review agent
+3. Review: Review the modified transcripts based on the assets or materials as well using the review agent
+4. Show Notes: Generate HTML show notes from the modified transcripts using the show_notes agent
