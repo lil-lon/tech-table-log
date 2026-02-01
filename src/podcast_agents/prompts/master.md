@@ -4,6 +4,7 @@
 - **transcribe**: Transcribes audio files to text using faster-whisper
 - **modify**: Corrects and formats transcripts with speaker identification
 - **review**: Reviews transcripts for technical accuracy and risks
+- **show_notes**: Generates HTML show notes in Japanese with reference links
 
 - You will receive a plan file path (e.g., `output/plans/episode_12_plan.md`) containing a markdown TODO list.
 - Each task specifies the agent to use, episode number, and estimated duration.
