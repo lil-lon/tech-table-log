@@ -24,6 +24,19 @@ from podcast_agents.utils.logger import setup_logging
 
 logger = setup_logging(__name__)
 PROMPTS_DIR = Path(__file__).parent / "prompts"
+MODEL = "claude-opus-5-5"
+
+# Writes are allowed only under the output directory. "Edit(path)" rules also
+# govern the Write tool. The deny rules close the path from a file write to code
+# execution via the single permitted Bash command (uv run auto-syncs the
+# environment and runs the editable-installed source).
+WRITE_ALLOW_RULES = [f"Edit({config.OUTPUT_DIR}/**)"]
+WRITE_DENY_RULES = [
+    "Edit(src/**)",
+    "Edit(pyproject.toml)",
+    "Edit(uv.lock)",
+    "Edit(.venv/**)",
+]
 
 
 def load_prompt(agent_name: str) -> str:
@@ -89,7 +102,7 @@ def build_workflow_agent() -> ClaudeAgentOptions:
             ),
             prompt=transcribe_prompt,
             tools=["Read", "Write", "Bash", "Glob", "Grep", "TaskOutput"],
-            model="opus",
+            model=MODEL,
         ),
         "modify": AgentDefinition(
             description=(
@@ -101,7 +114,7 @@ def build_workflow_agent() -> ClaudeAgentOptions:
             ),
             prompt=modify_prompt,
             tools=["Read", "Write", "Glob", "Grep"],
-            model="opus",
+            model=MODEL,
         ),
         "review": AgentDefinition(
             description=(
@@ -113,8 +126,8 @@ def build_workflow_agent() -> ClaudeAgentOptions:
                 f"Reference materials: {config.REFERENCE_MATERIALS_DIR}"
             ),
             prompt=review_prompt,
-            tools=["Read", "Write", "Glob", "Grep", "WebSearch"],
-            model="opus",
+            tools=["Read", "Write", "Glob", "Grep", "WebSearch", "WebFetch"],
+            model=MODEL,
         ),
         "show_notes": AgentDefinition(
             description=(
@@ -126,22 +139,30 @@ def build_workflow_agent() -> ClaudeAgentOptions:
             ),
             prompt=show_notes_prompt,
             tools=["Read", "Write", "Glob", "Grep"],
-            model="opus",
+            model=MODEL,
         ),
     }
 
+    # Reads inside cwd, Agent and TaskOutput need no approval. Bash is approved
+    # only by the PreToolUse hook, so a hook failure denies instead of allowing.
     options = ClaudeAgentOptions(
-        allowed_tools=[
+        tools=[
             "Read",
             "Write",
             "Glob",
             "Grep",
+            "Agent",
             "TaskOutput",
-            "Task",
             "Bash",
             "WebSearch",
+            "WebFetch",
         ],
-        permission_mode="acceptEdits",
+        allowed_tools=[*WRITE_ALLOW_RULES, "WebSearch", "WebFetch"],
+        disallowed_tools=WRITE_DENY_RULES,
+        permission_mode="dontAsk",
+        setting_sources=[],
+        strict_mcp_config=True,
+        model=MODEL,
         cwd=str(Path.cwd()),
         hooks=hooks,
         agents=agents,
@@ -166,8 +187,13 @@ def build_planner_agent() -> ClaudeAgentOptions:
     planner_prompt += f"\n\nOutput directory for plans: {config.PLANS_DIR}"
 
     options = ClaudeAgentOptions(
-        allowed_tools=["Read", "Write", "Glob"],
-        permission_mode="acceptEdits",
+        tools=["Read", "Write", "Glob"],
+        allowed_tools=[f"Edit({config.PLANS_DIR}/**)"],
+        disallowed_tools=WRITE_DENY_RULES,
+        permission_mode="dontAsk",
+        setting_sources=[],
+        strict_mcp_config=True,
+        model=MODEL,
         cwd=str(Path.cwd()),
         system_prompt=planner_prompt,
     )
