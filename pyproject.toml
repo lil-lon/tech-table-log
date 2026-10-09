@@ -8,7 +8,7 @@ authors = [{ name = "lil-lon", email = "69704776+lil-lon@users.noreply.github.co
 license = { file = "LICENSE" }
 dependencies = [
     "faster-whisper>=1.1.0",
-    "claude-agent-sdk>=0.1.0",
+    "claude-agent-sdk>=0.2.159",
 ]
 
 [build-system]
