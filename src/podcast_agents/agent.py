@@ -4,7 +4,6 @@ Core Podcast agents definition
 
 import shlex
 from pathlib import Path
-from typing import Literal
 
 from claude_agent_sdk import (
     AgentDefinition,
@@ -18,19 +17,10 @@ from claude_agent_sdk import (
     ResultMessage,
     TextBlock,
 )
+from claude_agent_sdk.types import HookEvent
 
 from podcast_agents import config
 from podcast_agents.utils.logger import setup_logging
-
-# HookEvent type matches SDK's internal definition
-HookEvent = Literal[
-    "PreToolUse",
-    "PostToolUse",
-    "UserPromptSubmit",
-    "Stop",
-    "SubagentStop",
-    "PreCompact",
-]
 
 logger = setup_logging(__name__)
 PROMPTS_DIR = Path(__file__).parent / "prompts"
